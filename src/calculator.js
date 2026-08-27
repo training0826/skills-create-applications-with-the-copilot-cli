@@ -3,11 +3,14 @@
 /**
  * calculator.js
  *
- * A simple Node.js CLI calculator supporting the four basic math operations:
+ * A simple Node.js CLI calculator supporting common math operations:
  *   - addition       (+ or add)
  *   - subtraction     (- or subtract)
  *   - multiplication  (* or multiply)
  *   - division        (/ or divide)
+ *   - modulo          (% or modulo)
+ *   - exponentiation  (^ or power)
+ *   - square root     (sqrt)
  *
  * Usage:
  *   node src/calculator.js <number1> <operation> <number2>
@@ -15,6 +18,9 @@
  * Examples:
  *   node src/calculator.js 5 + 3
  *   node src/calculator.js 10 divide 2
+ *   node src/calculator.js 10 % 3
+ *   node src/calculator.js 2 ^ 3
+ *   node src/calculator.js 9 sqrt
  */
 
 // Performs addition of two numbers.
@@ -40,6 +46,24 @@ function divide(a, b) {
   return a / b;
 }
 
+// Returns the remainder after dividing two numbers.
+function modulo(a, b) {
+  return a % b;
+}
+
+// Raises a base to an exponent.
+function power(base, exponent) {
+  return base ** exponent;
+}
+
+// Returns a number's square root, rejecting values without a real square root.
+function squareRoot(n) {
+  if (n < 0) {
+    throw new Error('Square root of a negative number is not allowed.');
+  }
+  return Math.sqrt(n);
+}
+
 // Maps supported operation names/symbols to their corresponding function.
 const operations = {
   '+': add,
@@ -54,10 +78,29 @@ const operations = {
   '/': divide,
   divide: divide,
   division: divide,
+  '%': modulo,
+  modulo: modulo,
+  remainder: modulo,
+  '^': power,
+  power: power,
+  exponentiation: power,
 };
 
 // Parses and validates CLI arguments, then executes the requested operation.
 function calculate(args) {
+  if (args.length === 2 && args[1].toLowerCase() === 'sqrt') {
+    const [rawN] = args;
+    const n = Number(rawN);
+
+    if (Number.isNaN(n)) {
+      throw new Error(
+        `Invalid number input: "${rawN}" is not a valid number.`
+      );
+    }
+
+    return squareRoot(n);
+  }
+
   if (args.length !== 3) {
     throw new Error(
       'Usage: node src/calculator.js <number1> <operation> <number2>'
@@ -77,7 +120,7 @@ function calculate(args) {
   const operation = operations[rawOperation.toLowerCase()];
   if (!operation) {
     throw new Error(
-      `Unsupported operation: "${rawOperation}". Supported operations: +, -, *, / (or add, subtract, multiply, divide).`
+      `Unsupported operation: "${rawOperation}". Supported operations: +, -, *, /, %, ^ (or add, subtract, multiply, divide, modulo, power).`
     );
   }
 
@@ -101,4 +144,13 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { add, subtract, multiply, divide, calculate };
+module.exports = {
+  add,
+  subtract,
+  multiply,
+  divide,
+  modulo,
+  power,
+  squareRoot,
+  calculate,
+};

@@ -3,6 +3,9 @@ const {
   subtract,
   multiply,
   divide,
+  modulo,
+  power,
+  squareRoot,
   calculate,
 } = require('../calculator');
 
@@ -43,6 +46,43 @@ describe('calculator arithmetic functions', () => {
   test('rejects division by zero', () => {
     expect(() => divide(10, 0)).toThrow('Division by zero is not allowed.');
   });
+
+  test.each([
+    [5, 2, 1],
+    [10, 3, 1],
+    [-10, 3, -1],
+    [5.5, 2, 1.5],
+  ])('returns the remainder of %p divided by %p as %p', (a, b, expected) => {
+    expect(modulo(a, b)).toBe(expected);
+  });
+
+  test.each([
+    [2, 3, 8],
+    [-2, 4, 16],
+    [5, 0, 1],
+    [4, -1, 0.25],
+  ])('raises %p to %p to return %p', (base, exponent, expected) => {
+    expect(power(base, exponent)).toBe(expected);
+  });
+
+  test.each([
+    [16, 4],
+    [9, 3],
+    [2.25, 1.5],
+    [0, 0],
+  ])('returns the square root of %p as %p', (n, expected) => {
+    expect(squareRoot(n)).toBe(expected);
+  });
+
+  test('returns an accurate square root for non-perfect squares', () => {
+    expect(squareRoot(2)).toBeCloseTo(1.41421356237);
+  });
+
+  test('rejects square roots of negative numbers', () => {
+    expect(() => squareRoot(-1)).toThrow(
+      'Square root of a negative number is not allowed.'
+    );
+  });
 });
 
 describe('calculate', () => {
@@ -55,6 +95,12 @@ describe('calculate', () => {
     [['10', 'subtraction', '4'], 6],
     [['45', 'MULTIPLY', '2'], 90],
     [['20', 'division', '5'], 4],
+    [['5', '%', '2'], 1],
+    [['10', '%', '3'], 1],
+    [['2', '^', '3'], 8],
+    [['2', 'power', '3'], 8],
+    [['16', 'sqrt'], 4],
+    [['9', 'sqrt'], 3],
   ])('calculates %p as %p', (args, expected) => {
     expect(calculate(args)).toBe(expected);
   });
@@ -72,14 +118,20 @@ describe('calculate', () => {
   });
 
   test('rejects unsupported operations', () => {
-    expect(() => calculate(['2', '%', '3'])).toThrow(
-      'Unsupported operation: "%". Supported operations: +, -, *, / (or add, subtract, multiply, divide).'
+    expect(() => calculate(['2', 'unknown', '3'])).toThrow(
+      'Unsupported operation: "unknown". Supported operations: +, -, *, /, %, ^ (or add, subtract, multiply, divide, modulo, power).'
     );
   });
 
   test('surfaces division-by-zero errors', () => {
     expect(() => calculate(['20', '/', '0'])).toThrow(
       'Division by zero is not allowed.'
+    );
+  });
+
+  test('surfaces negative square-root errors', () => {
+    expect(() => calculate(['-9', 'sqrt'])).toThrow(
+      'Square root of a negative number is not allowed.'
     );
   });
 });
